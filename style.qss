@@ -1,0 +1,265 @@
+/*
+ * NeuroMod 스타일시트. {{이름}} 은 theme.py 의 값으로 바뀐다 (색은 여기서 새로 만들지 않는다).
+ * 규칙
+ *   · 모서리 {{radius}} 하나. 그림자 · 그라데이션 · 반투명 없음. 영역은 1px 선으로만
+ *   · 버튼 · 입력칸 · 드롭다운 높이 {{ctrl_h}} + 테두리 2px, 글자 {{ui_pt}}
+ *   · 간격은 4px 배수 ({{s1}} {{s2}} {{s3}} ...)
+ *   · 강조색 accent 는 송신 버튼에만. 나머지는 무채색
+ *   · 고정폭 글꼴은 숫자 · 주파수 · 호출부호에만 (#num, #call, #txText, #statVal, #clock)
+ */
+
+* {
+    font-family: "{{ui_font}}";
+    font-size: {{ui_pt}};
+    color: {{text}};
+    outline: 0;
+}
+
+QMainWindow, QDialog { background: {{bg0}}; }
+QMainWindow::separator { background: {{bg0}}; width: {{s1}}; height: {{s1}}; }
+QMainWindow::separator:hover { background: {{line2}}; }
+
+/* ---------------- 도킹 패널 ---------------- */
+QDockWidget { color: {{text2}}; }
+QDockWidget > QWidget { background: {{bg1}}; border: 1px solid {{line}}; border-top: 0; }
+QScrollArea#dockScroll { background: {{bg1}}; border: 0; }
+QScrollArea#dockScroll > QWidget > QWidget#dockBody, QWidget#dockBody { background: {{bg1}}; }
+QWidget#dockTitle {
+    background: {{bg1}}; border: 1px solid {{line}}; border-bottom: 1px solid {{line}};
+}
+QLabel#dockTitleText { color: {{text}}; font-weight: bold; }  /* 맑은 고딕 Bold (malgunbd.ttf) — 가짜 굵기 아님 */
+QLabel#age { color: {{text3}}; font-size: {{small_pt}}; }
+QToolButton#titleBtn {
+    background: transparent; border: 0; border-radius: {{radius}};
+    color: {{text3}}; padding: 0; min-width: 20px; max-width: 20px; min-height: 18px; max-height: 18px;
+}
+QToolButton#titleBtn:hover { color: {{text}}; background: {{bg3}}; }
+QToolButton#titleBtn:pressed { background: {{bg4}}; }
+QToolButton#titleHelp {
+    background: transparent; color: {{text2}}; border: 1px solid {{line2}}; border-radius: 9px;
+    min-width: 16px; max-width: 16px; min-height: 16px; max-height: 16px; padding: 0; font-weight: bold; font-size: {{small_pt}};
+}
+QToolButton#helpBox {
+    background: transparent; color: {{text2}}; border: 1px solid {{line2}}; border-radius: {{radius}};
+    min-width: 16px; max-width: 16px; min-height: 16px; max-height: 16px; padding: 0; font-size: {{small_pt}};
+}
+QToolButton#helpBox:hover { color: {{text}}; background: {{bg3}}; }
+QFrame#helpPop { background: {{bg3}}; border: 1px solid {{line2}}; border-radius: {{radius}}; }
+QLabel#helpText { color: {{text}}; }
+
+QTabBar::tab {
+    background: {{bg0}}; color: {{text2}}; padding: {{s1}} {{s3}};
+    border: 1px solid {{line}}; border-bottom: 0; margin-right: 1px;
+}
+QTabBar::tab:selected { background: {{bg1}}; color: {{text}}; }
+
+/* ---------------- 도구 막대 ---------------- */
+QToolBar { background: {{bg1}}; border: 0; border-bottom: 1px solid {{line}}; spacing: {{s2}}; padding: {{s1}} {{s2}}; }
+QToolBar::separator { background: {{line}}; width: 1px; margin: {{s1}} {{s1}}; }
+QLabel#toolLabel { color: {{text3}}; padding: 0 {{s1}} 0 {{s1}}; }
+
+/* 세그먼트 버튼 묶음: 테두리 하나 안에 평평한 칸들. 선택된 칸은 채움 + 밑줄 */
+QWidget#segment { background: {{bg2}}; border: 1px solid {{line2}}; border-radius: {{radius}}; }
+QWidget#segment QToolButton {
+    background: transparent; color: {{text2}}; border: 0; border-left: 1px solid {{line}};
+    border-radius: 0; padding: 0 {{s3}}; min-height: {{ctrl_h}}; max-height: {{ctrl_h}};
+}
+QWidget#segment QToolButton[first="true"] { border-left: 0; }
+QWidget#segment QToolButton:hover { background: {{bg3}}; color: {{text}}; }
+QWidget#segment QToolButton:pressed { background: {{bg4}}; }
+QWidget#segment QToolButton:checked {
+    background: {{bg4}}; color: {{text}}; border-bottom: 2px solid {{text2}}; padding-top: 2px;
+}
+QWidget#segment QToolButton:disabled { color: {{text3}}; }
+QWidget#segment QToolButton::menu-indicator { image: url("{{icon_arrow}}"); subcontrol-position: right center; right: {{s2}}; }
+QWidget#segment QToolButton[popupMode="2"] { padding-right: {{s6}}; }
+
+/* ---------------- 상태 막대 ---------------- */
+QStatusBar { background: {{bg1}}; border-top: 1px solid {{line}}; color: {{text2}}; }
+QStatusBar::item { border: 0; }
+QLabel#statusMsg { color: {{text2}}; padding: 0 {{s2}}; }
+QLabel#statusMsg[error="true"] { color: {{err}}; }
+QLabel#statusInfo { color: {{text2}}; padding: 0 {{s2}}; border-left: 1px solid {{line}}; }
+QLabel#clock { font-family: "{{mono_font}}"; color: {{text}}; padding: 0 {{s2}}; border-left: 1px solid {{line}}; }
+
+/* ---------------- 버튼 (하나의 규칙) ---------------- */
+QPushButton {
+    background: {{bg2}}; color: {{text}}; border: 1px solid {{line2}}; border-radius: {{radius}};
+    padding: 0 {{s3}}; min-height: {{ctrl_h}}; max-height: {{ctrl_h}};
+}
+QPushButton:hover { background: {{bg3}}; border-color: {{text3}}; }
+QPushButton:pressed { background: {{bg4}}; border-color: {{text3}}; }
+QPushButton:disabled { background: {{bg1}}; color: {{text3}}; border-color: {{line}}; }
+
+/* 송신: 화면에서 유일한 강조색 */
+QPushButton#txButton {
+    background: {{accent}}; color: {{accent_text}}; border: 1px solid {{accent}}; font-weight: bold;
+    min-width: 64px;
+}
+QPushButton#txButton:hover { background: {{accent_hover}}; border-color: {{accent_hover}}; }
+QPushButton#txButton:pressed { background: {{tx}}; border-color: {{tx}}; }
+QPushButton#txButton:disabled { background: {{bg1}}; color: {{text3}}; border-color: {{line}}; }
+QPushButton#txButton[transmitting="true"] { background: {{err}}; color: {{accent_text}}; border-color: {{err}}; }
+
+/* 매크로: 같은 폭 · 같은 간격 한 줄 */
+QPushButton#macro { min-width: 48px; max-width: 48px; padding: 0; }
+
+/* ---------------- 입력칸 · 드롭다운 ---------------- */
+QLineEdit, QComboBox, QSpinBox, QPlainTextEdit {
+    background: {{bg2}}; color: {{text}}; border: 1px solid {{line2}}; border-radius: {{radius}};
+    padding: 0 {{s2}}; selection-background-color: {{bg4}}; selection-color: {{text}};
+}
+QLineEdit, QComboBox, QSpinBox { min-height: {{ctrl_h}}; max-height: {{ctrl_h}}; }
+QSpinBox#dbfs { padding: 0 {{s2}}; font-family: "{{mono_font}}"; }
+QLineEdit:hover, QComboBox:hover { border-color: {{text3}}; }
+QLineEdit:focus, QComboBox:focus, QPlainTextEdit:focus { border-color: {{text2}}; }
+QLineEdit:disabled, QComboBox:disabled { background: {{bg1}}; color: {{text3}}; border-color: {{line}}; }
+/* 호출부호 · 보낼 문장: 글자가 있을 때만 고정폭 (안내 문구는 일반 글꼴) */
+QLineEdit#call[empty="false"], QLineEdit#txText[empty="false"] { font-family: "{{mono_font}}"; }
+QLineEdit::placeholder { color: {{text3}}; }
+
+QComboBox { padding-right: {{s6}}; }
+QComboBox::drop-down {
+    subcontrol-origin: padding; subcontrol-position: center right; width: {{s5}};
+    border: 0; border-left: 1px solid {{line}};
+}
+QComboBox::down-arrow { image: url("{{icon_arrow}}"); width: 10px; height: 6px; }
+QComboBox::down-arrow:disabled { image: url("{{icon_arrow_dis}}"); }
+QComboBox::down-arrow:on { top: 1px; }
+QComboBox QAbstractItemView {
+    background: {{bg2}}; border: 1px solid {{line2}}; padding: 0;
+    selection-background-color: {{bg4}}; selection-color: {{text}};
+}
+
+/* 체크박스: 테마 칸 + 그린 체크 표시 */
+QCheckBox { color: {{text2}}; spacing: {{s2}}; min-height: {{ctrl_h}}; }
+QCheckBox:hover { color: {{text}}; }
+QCheckBox:disabled { color: {{text3}}; }
+QCheckBox::indicator {
+    width: 12px; height: 12px; border: 1px solid {{line2}}; border-radius: {{radius}}; background: {{bg2}};
+}
+QCheckBox::indicator:hover { border-color: {{text2}}; }
+QCheckBox::indicator:checked { background: {{text2}}; border-color: {{text2}}; image: url("{{icon_check}}"); }
+QCheckBox::indicator:checked:hover { background: {{text}}; border-color: {{text}}; }
+QCheckBox::indicator:disabled { background: {{bg1}}; border-color: {{line}}; }
+
+QSlider { min-height: {{ctrl_h}}; }
+QSlider::groove:horizontal { height: 4px; background: {{bg3}}; border-radius: {{radius}}; }
+QSlider::sub-page:horizontal { background: {{text3}}; border-radius: {{radius}}; }
+QSlider::handle:horizontal {
+    background: {{text2}}; width: 8px; margin: -6px 0; border-radius: {{radius}}; border: 1px solid {{bg0}};
+}
+QSlider::handle:horizontal:hover { background: {{text}}; }
+
+/* ---------------- 글자 ---------------- */
+QLabel#dim { color: {{text2}}; }
+QLabel#faint { color: {{text3}}; }
+QLabel#num { font-family: "{{mono_font}}"; color: {{text2}}; }
+QLabel#section { color: {{text3}}; padding: {{s1}} {{s2}} 0 {{s2}}; }
+QLabel#statKey { color: {{text2}}; }
+QLabel#statVal { font-family: "{{mono_font}}"; color: {{text}}; }
+QLabel#note { color: {{text3}}; font-size: {{small_pt}}; }
+QWidget#hline { background: {{line}}; min-height: 1px; max-height: 1px; }
+QWidget#vline { background: {{line}}; min-width: 1px; max-width: 1px; }
+
+/* ---------------- 표 ---------------- */
+QTableView {
+    background: {{bg1}}; alternate-background-color: {{bg1}}; gridline-color: {{line}};
+    border: 0; selection-background-color: {{bg4}}; selection-color: {{text}};
+}
+QTableView::item { padding: 0 {{s2}}; border-bottom: 1px solid {{bg2}}; }
+QTableView::item:hover { background: {{bg2}}; }
+QHeaderView { background: {{bg1}}; }
+QHeaderView::section {
+    background: {{bg1}}; color: {{text3}}; border: 0; border-bottom: 1px solid {{line2}};
+    padding: 0 {{s2}}; min-height: 22px; font-size: {{small_pt}};
+}
+QHeaderView::section:hover { color: {{text2}}; }
+QTableCornerButton::section { background: {{bg1}}; border: 0; }
+
+/* ---------------- 트리 (패킷 해부 요약) ---------------- */
+QTreeView {
+    background: {{bg1}}; alternate-background-color: {{bg1}}; border: 0; color: {{text}};
+    selection-background-color: {{bg4}}; selection-color: {{text}};
+}
+QTreeView::item { padding: 2px 0; }
+QTreeView#dissectTree { font-size: {{ui_pt}}; }
+QTreeView#dissectTree::branch { background: {{bg1}}; }
+QTreeView::item:hover { background: {{bg2}}; }
+
+/* ---------------- 스크롤 막대 ---------------- */
+QScrollBar:vertical { background: {{bg1}}; width: {{s2}}; margin: 0; }
+QScrollBar::handle:vertical { background: {{line2}}; min-height: 24px; border-radius: {{radius}}; }
+QScrollBar::handle:vertical:hover { background: {{text3}}; }
+QScrollBar:horizontal { background: {{bg1}}; height: {{s2}}; margin: 0; }
+QScrollBar::handle:horizontal { background: {{line2}}; min-width: 24px; border-radius: {{radius}}; }
+QScrollBar::handle:horizontal:hover { background: {{text3}}; }
+QScrollBar::add-line, QScrollBar::sub-line { width: 0; height: 0; }
+QScrollBar::add-page, QScrollBar::sub-page { background: none; }
+
+QToolTip { background: {{bg3}}; color: {{text}}; border: 1px solid {{line2}}; padding: {{s1}} {{s2}}; }
+QMenu { background: {{bg2}}; border: 1px solid {{line2}}; padding: {{s1}} 0; }
+QMenu::item { padding: {{s1}} {{s4}} {{s1}} {{s6}}; }
+QMenu::item:selected { background: {{bg4}}; }
+QMenu::indicator { width: 12px; height: 12px; left: {{s2}}; }
+QMenu::indicator:checked { background: {{text2}}; border: 1px solid {{text2}}; border-radius: {{radius}}; image: url("{{icon_check}}"); }
+QMenu::indicator:unchecked { background: {{bg2}}; border: 1px solid {{line2}}; border-radius: {{radius}}; }
+QInputDialog QLabel { color: {{text2}}; }
+
+/* ---------------- 실교신 수신 · 송신 (8단계) ---------------- */
+QTextEdit#qsoRx {
+    background: {{bg0}}; color: {{text}}; border: 1px solid {{line}}; border-radius: {{radius}};
+    padding: {{s2}}; selection-background-color: {{bg4}}; selection-color: {{text}};
+}
+QPlainTextEdit#qsoTx { background: {{bg0}}; padding: {{s2}}; }
+QProgressBar { background: {{bg2}}; border: 1px solid {{line}}; border-radius: 2px; }
+QProgressBar::chunk { background: {{tx}}; }
+QLabel#dim[error="true"] { color: {{err}}; }
+
+/* ---------------- 설정 창 · About ---------------- */
+QTextBrowser, QDialog#settingsDialog QTableWidget {
+    background: {{bg2}}; color: {{text}}; border: 1px solid {{line2}}; border-radius: {{radius}};
+    selection-background-color: {{bg4}}; selection-color: {{text}};
+}
+/* 19부 설정 창: 왼쪽 목록 (틀 없음, 고른 줄만 옅은 바탕) + 오른쪽 묶음 */
+QListWidget#settingsNav {
+    background: {{bg1}}; color: {{text}}; border: 0; border-right: 1px solid {{line}}; outline: 0;
+    padding: {{s3}} {{s2}};
+}
+QListWidget#settingsNav::item { padding: {{s2}} {{s3}}; border-radius: {{radius}}; margin: 1px 0; }
+QListWidget#settingsNav::item:selected { background: {{bg3}}; color: {{text}}; }
+QListWidget#settingsNav::item:hover:!selected { background: {{bg2}}; }
+QLabel#pageTitle { color: {{text}}; font-size: 14pt; font-weight: bold; }
+QLabel#groupTitle { color: {{text2}}; font-size: {{small_pt}}; padding-left: {{s1}}; }
+QFrame#group { background: {{bg1}}; border: 1px solid {{line}}; border-radius: {{radius}}; }
+QFrame#groupLine { background: {{line}}; border: 0; }
+QLabel#rowLabel { color: {{text}}; }
+QLabel#testResult { color: {{text2}}; padding-left: {{s2}}; }
+QLabel#testResult[state="ok"] { color: {{text}}; }
+QLabel#testResult[state="err"] { color: {{err}}; }
+QRadioButton { color: {{text}}; spacing: {{s1}}; }
+QRadioButton:disabled { color: {{text3}}; }
+QRadioButton::indicator { width: 10px; height: 10px; border-radius: 6px; border: 1px solid {{line2}}; background: {{bg2}}; }
+QRadioButton::indicator:checked { background: {{text2}}; border-color: {{text2}}; }
+QRadioButton::indicator:disabled { border-color: {{line}}; background: {{bg1}}; }
+QPushButton:default, QPushButton:focus { border-color: {{line2}}; outline: 0; }
+QDoubleSpinBox { background: {{bg2}}; color: {{text}}; border: 1px solid {{line2}}; border-radius: {{radius}};
+    padding: 0 {{s2}}; min-height: {{ctrl_h}}; max-height: {{ctrl_h}}; font-family: "{{mono_font}}"; }
+QSpinBox { font-family: "{{mono_font}}"; }
+QDialog#settingsDialog QListWidget::item:disabled { color: {{text3}}; }
+QDialog#settingsDialog QHeaderView::section { background: {{bg1}}; color: {{text2}}; border: 0; padding: {{s1}}; }
+QDialog#settingsDialog QProgressBar {
+    background: {{bg2}}; color: {{text}}; border: 1px solid {{line2}}; border-radius: {{radius}};
+    text-align: center; max-height: {{ctrl_h}};
+}
+QDialog#settingsDialog QProgressBar::chunk { background: {{text3}}; }
+
+/* VFO 패널 (19부): 글자색만, 바탕 · 테두리 장식 없음 */
+QLabel#vfoRf { font-family: "{{mono_font}}"; color: {{text}}; }
+QPushButton#pttButton { min-width: 64px; }
+QPushButton#pttButton:pressed, QPushButton#pttButton[on="true"] {
+    background: {{bg4}}; color: {{err}}; border-color: {{err}};
+}
+QLabel#vfoCat { color: {{text3}}; }
+QLineEdit#freqEdit { font-family: "{{mono_font}}"; }
+QScrollArea#plainScroll, QScrollArea#plainScroll > QWidget, QWidget#plainPage { background: transparent; border: 0; }

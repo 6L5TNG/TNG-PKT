@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.venv/
+packaging/build_env/
+packaging/build/
+packaging/dist/
+packaging/version-info.txt
+output/
+*.log
