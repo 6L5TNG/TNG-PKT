@@ -18,20 +18,20 @@ Read the common paths below for the overall processing order, then the mode sect
 
 | Mode | Intended role | Protocol version | Wire revision | Main implementation |
 |---|---|---|---|---|
-| TNG44 | Standard | 0.1.0 | 1 | [link7](../link7.py), [modem5](../modem5.py), [realtime_rx](../realtime_rx.py) |
-| TNG5 | Robust | 0.4.0 | 4 | [tng5](../tng5.py), [tng5_app](../tng5_app.py) |
-| TNG1 | Robust+ | 0.1.1 | 2 | [tng1](../tng1.py), [tng1_app](../tng1_app.py) |
+| TNG44 | Standard | 0.1.0 | 1 | [link7](../tngpkt/link7.py), [modem5](../tngpkt/modem5.py), [realtime_rx](../tngpkt/realtime_rx.py) |
+| TNG5 | Robust | 0.4.0 | 4 | [tng5](../tngpkt/tng5.py), [tng5_app](../tngpkt/tng5_app.py) |
+| TNG1 | Robust+ | 0.1.1 | 2 | [tng1](../tngpkt/tng1.py), [tng1_app](../tngpkt/tng1_app.py) |
 
-Versions come from [registry.py](../registry.py). Some source comments and local module version strings refer to older implementations; they do not override these active definitions.
+Versions come from [registry.py](../tngpkt/registry.py). Some source comments and local module version strings refer to older implementations; they do not override these active definitions.
 
 - Byte fields are sent most-significant bit first through NumPy's default `unpackbits`/`packbits` ordering. Two-byte lengths/counts and byte-oriented CRC values use big-endian order.
 - Array positions below are zero-based. Code bits are read left to right.
 - A **segment** is a TNG44/TNG5 CRC unit. A learned-modem **frame** carries 96 coded bits and lasts 192 ms. A TNG1 **block** is a different structure: 92 tone symbols lasting 14.72 seconds.
 - The default audio center is 1500 Hz. TNG44/TNG5 use 2000 complex baseband samples/s; TNG1 uses 1000 samples/s. Audio is obtained by resampling and taking `real(baseband * exp(j*2*pi*center*t))`.
-- Center-frequency selection, output gain, audio resampling and optional VOX lead tone/PTT delay operate outside the information coding. See [modem](../modem.py), [freqshift](../freqshift.py) and the UI transmit path in [neuromod_app](../neuromod_app.py).
+- Center-frequency selection, output gain, audio resampling and optional VOX lead tone/PTT delay operate outside the information coding. See [modem](../tngpkt/modem.py), [freqshift](../tngpkt/freqshift.py) and the UI transmit path in [neuromod_app](../tngpkt/neuromod_app.py).
 - Live reception uses the selected mode only. These are independent communication modes, not an automatic receive-everything protocol.
 
-The 96-bit legacy header/payload format described at the top of [framing.py](../framing.py) is **not** the active TNG44/TNG5 segment format. The active paths reuse its CRC function; their framing is defined separately below.
+The 96-bit legacy header/payload format described at the top of [framing.py](../tngpkt/framing.py) is **not** the active TNG44/TNG5 segment format. The active paths reuse its CRC function; their framing is defined separately below.
 
 ## Common transmit path
 
@@ -77,7 +77,7 @@ Only CRC-confirmed content is eligible for text display, with additional acquisi
 
 ## Registered reference rates
 
-These values are registered in [registry.py](../registry.py), not new RF measurements. The data-section rate is a long-message incremental reference; TNG5 includes recurring mid-sync overhead. The whole-transmission reference uses a 24-character message, including synchronization. Short messages, UTF-8 byte lengths, Huffman code lengths and reception failures change effective throughput.
+These values are registered in [registry.py](../tngpkt/registry.py), not new RF measurements. The data-section rate is a long-message incremental reference; TNG5 includes recurring mid-sync overhead. The whole-transmission reference uses a 24-character message, including synchronization. Short messages, UTF-8 byte lengths, Huffman code lengths and reception failures change effective throughput.
 
 | Mode | Data-section characters/s | Information bits/s | Whole-transmission characters/s (24-character reference) | Information bits/s (same reference) | Registered −60 dB occupied bandwidth |
 |---|---:|---:|---:|---:|---:|
@@ -97,7 +97,7 @@ The leading length field is a **byte count**, not a character count. Successful 
 
 ### Shared TNG5/TNG1 canonical Huffman codebook
 
-Both modes use [charset1.py](../charset1.py), with 57 input characters plus an internal EOT terminator. Input normalization is exactly:
+Both modes use [charset1.py](../tngpkt/charset1.py), with 57 input characters plus an internal EOT terminator. Input normalization is exactly:
 
 ```python
 t = text.upper().replace("\r\n", "\n").replace("\r", "\n").replace("\t", " ")
@@ -221,9 +221,9 @@ n_frames = ceil(coded_bits / 96)
 
 ### CRC and FEC
 
-The segment CRC is the byte-oriented CRC-16/CCITT-FALSE function in [framing.py](../framing.py): polynomial `0x1021`, initial register `0xFFFF`, non-reflected input/output, no final XOR. The CRC is appended high byte first.
+The segment CRC is the byte-oriented CRC-16/CCITT-FALSE function in [framing.py](../tngpkt/framing.py): polynomial `0x1021`, initial register `0xFFFF`, non-reflected input/output, no final XOR. The CRC is appended high byte first.
 
-FEC is K=7, R1/2 with generators **0o133, 0o171 in that output order**. The initial six-bit state is zero. For input bit `u` and state `s`, `reg=(u<<6)|s`; emit the parity of `reg & generator` for each generator and update `s=reg>>1`. The six final zero inputs return the state to zero. See [fec.py](../fec.py) and `link7.conv_encode_rows`.
+FEC is K=7, R1/2 with generators **0o133, 0o171 in that output order**. The initial six-bit state is zero. For input bit `u` and state `s`, `reg=(u<<6)|s`; emit the parity of `reg & generator` for each generator and update `s=reg>>1`. The six final zero inputs return the state to zero. See [fec.py](../tngpkt/fec.py) and `link7.conv_encode_rows`.
 
 There is no payload whitening stage or dedicated repeated-message combiner in the active TNG44 path. XOR inside CRC/parity calculations is error-control arithmetic, not encryption.
 
@@ -261,7 +261,7 @@ tone offset for index k = (k - 3) * 62.5 Hz
 symbol duration = 32 ms; each seven-symbol sync = 224 ms
 ```
 
-Synchronization uses continuous phase with 4 ms frequency-transition smoothing. [preamble.assemble](../preamble.py) applies the public 200 Hz/129-tap LPF to sync waveforms, overlaps filter tails with neighboring regions, and smooths the data/sync boundaries; it does not insert another information field.
+Synchronization uses continuous phase with 4 ms frequency-transition smoothing. [preamble.assemble](../tngpkt/preamble.py) applies the public 200 Hz/129-tap LPF to sync waveforms, overlaps filter tails with neighboring regions, and smooths the data/sync boundaries; it does not insert another information field.
 
 The receiver downconverts audio, correlates public sync templates over time/frequency offsets, corrects frequency and evaluates contextual modem windows for 96 bit LLRs per frame. It deinterleaves, performs soft Viterbi decoding and verifies each segment CRC. The first valid segment supplies the payload-byte count; end sync can also determine the received duration or trigger recovery from buffered audio when start sync was missed. Alignment hypotheses and relocking are receiver algorithms, not secret mappings. Partial text is displayed only from CRC-confirmed segments. There are no periodic mid-sync join markers.
 
@@ -296,7 +296,7 @@ The first segment contains the total segment count as two big-endian bytes and *
 
 The original, unwhitened 18-byte segment is protected by the same byte CRC-16/CCITT-FALSE as TNG44: `0x1021`, initial `0xFFFF`, non-reflected, no final XOR; high byte first.
 
-[tng5.py](../tng5.py), `WHITEN`, `whiten` and `seg_bits` specify:
+[tng5.py](../tngpkt/tng5.py), `WHITEN`, `whiten` and `seg_bits` specify:
 
 ```python
 WHITEN = np.random.default_rng(4040).integers(
@@ -372,7 +372,7 @@ M4: (2,3,5,0,4,1,6)
 
 For sync sequence index `v`, the frequency offset is `(v-(max(sequence)+min(sequence))/2)*spacing`. The sync modulation uses continuous phase with Gaussian frequency shaping, **BT=0.5**, and **+2.25 dB** amplitude-relative-to-data boost as implemented by `10**(BOOST_DB/20)`. The sync sequences are sent once; the old A×4/B×4 sync repetition is not the current structure.
 
-[tng5.build_tx](../tng5.py) filters the assembled waveform with the public 200 Hz/129-tap LPF. It clips data/guard envelope peaks (excluding mid-sync) at data RMS +3 dB and applies the LPF for three iterations. These waveform operations do not add encrypted fields.
+[tng5.build_tx](../tngpkt/tng5.py) filters the assembled waveform with the public 200 Hz/129-tap LPF. It clips data/guard envelope peaks (excluding mid-sync) at data RMS +3 dB and applies the LPF for three iterations. These waveform operations do not add encrypted fields.
 
 ### Receive reconstruction and joining
 
@@ -405,7 +405,7 @@ normalized text -> public Huffman packing into 64-bit units
 
 Each block carries 64 text/control/padding bits and 16 CRC bits. The shared Huffman codes are packed without crossing block boundaries. The transmitter continues until EOT has actually been inserted; it can append an EOT-only block. Blocks have no sequence-number field, secret address field or retransmission marker.
 
-[tng1.crc16_bits](../tng1.py) processes all 64 packed text bits MSB-first with polynomial **0x1021**. Normally the initial register is **0xFFFF**. The first block of a message uses **0x5A5A**, a public first-block indication introduced by current wire revision 2. Each input bit is XORed with the register's top bit, the register shifts left, and the polynomial is XORed when that result is one. There is no reflection or final XOR. Append the resulting register's 16 bits MSB-first. The receiver accepts the appropriate CRC initialization to distinguish a first block; these initial values are not keys.
+[tng1.crc16_bits](../tngpkt/tng1.py) processes all 64 packed text bits MSB-first with polynomial **0x1021**. Normally the initial register is **0xFFFF**. The first block of a message uses **0x5A5A**, a public first-block indication introduced by current wire revision 2. Each input bit is XORed with the register's top bit, the register shifts left, and the polynomial is XORed when that result is one. There is no reflection or final XOR. Append the resulting register's 16 bits MSB-first. The receiver accepts the appropriate CRC initialization to distinguish a first block; these initial values are not keys.
 
 The tail-biting convolutional encoder has **K=13**, 4096 states and generators in this exact order:
 
@@ -427,7 +427,7 @@ The label is an integer **0..15** and directly selects a tone. There is no addit
 
 Each block has **80 data symbols + 12 synchronization symbols**, at **160 ms per symbol**, totaling **92*0.160 = 14.72 seconds**. The same layout is used in every block.
 
-[tng1.layout](../tng1.py) uses public NumPy `default_rng(11)`. It consumes a 12-value uniform draw for sync-position jitter, then a 16-value tone permutation, then an 80-value data-symbol permutation. No runtime entropy or secret seed is supplied. For this configuration the exact arrays are:
+[tng1.layout](../tngpkt/tng1.py) uses public NumPy `default_rng(11)`. It consumes a 12-value uniform draw for sync-position jitter, then a 16-value tone permutation, then an 80-value data-symbol permutation. No runtime entropy or secret seed is supplied. For this configuration the exact arrays are:
 
 ```text
 sync positions = [3,11,19,26,34,43,49,57,66,73,80,88]
@@ -459,7 +459,7 @@ At 1000 baseband samples/s, repeat each nominal tone frequency for 160 samples a
 chirp[n] = 50 * ((n+0.5)/160 - 0.5) Hz, n=0..159
 ```
 
-The chirp is added per symbol, with its return smoothed separately at **BT=8** (`chirp_smooth=False`, `chirp_bt=8`). Integrate the sum to phase: `phase=2*pi*cumsum(f)/1000`; output `exp(j*phase)`. [tng1.gfsk](../tng1.py) defines the Gaussian kernel truncation and endpoint extension exactly. The stream has 20 ms start/end ramps, then is resampled and shifted to the selected audio center.
+The chirp is added per symbol, with its return smoothed separately at **BT=8** (`chirp_smooth=False`, `chirp_bt=8`). Integrate the sum to phase: `phase=2*pi*cumsum(f)/1000`; output `exp(j*phase)`. [tng1.gfsk](../tngpkt/tng1.py) defines the Gaussian kernel truncation and endpoint extension exactly. The stream has 20 ms start/end ramps, then is resampled and shifted to the selected audio center.
 
 There is no separate start preamble, end Costas sequence or TNG5-style mid-sync. Twelve scattered synchronization tones in **every block** support block acquisition and joining without scheduled time slots.
 
@@ -482,25 +482,25 @@ The actual data modulation is specified by the public code **and the bundled num
 
 Both supplied checkpoint configurations specify 2000 Hz baseband, 8 samples per modulation symbol, 2 coded bits per symbol and 48 symbols per frame. Thus 96 coded bits map to 384 samples (192 ms). They use a 16-value position embedding, transmitter hidden widths (256,256), 200 Hz/129-tap fixed FIR, and receiver context of four symbols on each side (448-sample receive windows).
 
-[models3.StreamTransmitter](../models3.py) defines the mapping:
+[models3.StreamTransmitter](../tngpkt/models3.py) defines the mapping:
 
 1. Group coded stream bits into ordered pairs; prepend/append the appropriate public 96-bit guard before grouping.
 2. For modulation-symbol index `j`, use position embedding `pos[j % 48]` and concatenate it with `2*bits-1`.
 3. Apply the checkpoint's MLP: Linear, GELU, Linear, GELU, Linear, yielding 16 real outputs for eight complex samples. Reshape each adjacent real-output pair as I and Q.
 4. Concatenate those samples into the stream, apply the checkpoint's public fixed FIR **once across the whole stream**, and normalize by its mean complex power.
-5. [modem5._frames_to_baseband](../modem5.py) applies the 20 ms boundary ramp and renormalizes; each mode then adds its synchronization and shaping described above.
+5. [modem5._frames_to_baseband](../tngpkt/modem5.py) applies the 20 ms boundary ramp and renormalizes; each mode then adds its synchronization and shaping described above.
 
-The FIR coefficients and their normalization are generated publicly by [waveform.design_lpf](../waveform.py), and its buffer is also in the checkpoint. Runtime loading replaces the transmitter/receiver parameters with the bundled state dictionary; no runtime-generated secret mapping is selected.
+The FIR coefficients and their normalization are generated publicly by [waveform.design_lpf](../tngpkt/waveform.py), and its buffer is also in the checkpoint. Runtime loading replaces the transmitter/receiver parameters with the bundled state dictionary; no runtime-generated secret mapping is selected.
 
-[models3.ContextReceiver](../models3.py) uses the public FIR and RMS normalization, two-channel I/Q convolution layers, symbol downsampling, residual blocks, global context and a two-bit-logit output head. Its numeric weights define soft bit demodulation. [modem4._rx_windows](../modem4.py) flattens those logits in coded-bit order. Positive LLR values favor bit 1. FEC/CRC then reconstruct and validate the public text encoding.
+[models3.ContextReceiver](../tngpkt/models3.py) uses the public FIR and RMS normalization, two-channel I/Q convolution layers, symbol downsampling, residual blocks, global context and a two-bit-logit output head. Its numeric weights define soft bit demodulation. [modem4._rx_windows](../tngpkt/modem4.py) flattens those logits in coded-bit order. Positive LLR values favor bit 1. FEC/CRC then reconstruct and validate the public text encoding.
 
 The full tensor values are in the linked public checkpoints, not transcribed as thousands of artificial constellation entries in this document. Matching wire revisions and model identifiers are necessary for compatible TNG44/TNG5 communication. TNG1 needs no checkpoint.
 
 ## Design and development evidence
 
-The published source supports a software validation approach to coding, synchronization and waveform recovery. [modem5.cmd_loopback](../modem5.py) generates a waveform, converts it to audio, applies frequency offset, optional sound-card clock mismatch and band-limited Gaussian noise, decodes the result, and compares recovered text with the input. [modem.add_band_noise](../modem.py) defines the noise injection used by that path.
+The published source supports a software validation approach to coding, synchronization and waveform recovery. [modem5.cmd_loopback](../tngpkt/modem5.py) generates a waveform, converts it to audio, applies frequency offset, optional sound-card clock mismatch and band-limited Gaussian noise, decodes the result, and compares recovered text with the input. [modem.add_band_noise](../tngpkt/modem.py) defines the noise injection used by that path.
 
-[tng1.channel](../tng1.py) provides AWGN and two-path Watterson-style fading simulation, with Gaussian Doppler gains, delay, frequency offset/drift, level changes and optional impulse noise. These functions show which impairments can be simulated in the public implementation. They are validation helpers, not extra transmitted fields or the radio channel itself.
+[tng1.channel](../tngpkt/tng1.py) provides AWGN and two-path Watterson-style fading simulation, with Gaussian Doppler gains, delay, frequency offset/drift, level changes and optional impulse noise. These functions show which impairments can be simulated in the public implementation. They are validation helpers, not extra transmitted fields or the radio channel itself.
 
 Source comments describe parameter comparisons for synchronization, clipping and character packing, but many referenced experiment scripts and result logs are absent from this public tree. Those comments do not establish reproducible success rates, channel limits or completed RF validation. No unseen development records or older configurations are used here to define the current protocol.
 

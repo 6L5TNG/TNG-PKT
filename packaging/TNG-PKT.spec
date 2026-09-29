@@ -7,7 +7,7 @@ root=Path(SPECPATH)
 source=Path(os.environ.get('TNG_PKT_SOURCE',root.parent)).resolve()
 assert torch.version.cuda is None and '+cpu' in torch.__version__, 'CPU torch required'
 version={}
-for node in ast.parse((source/'registry.py').read_text(encoding='utf-8')).body:
+for node in ast.parse((source/'tngpkt'/'registry.py').read_text(encoding='utf-8')).body:
     if isinstance(node,ast.Assign) and isinstance(node.value,ast.Constant):
         version.update({t.id:node.value.value for t in node.targets if isinstance(t,ast.Name)})
 v=tuple(map(int,version['APP_VERSION'].split('.')))+(version['APP_BUILD'],)
@@ -17,7 +17,7 @@ datas=[(str(source/'models'),'models'),(str(source/'assets'),'assets'),(str(sour
 # Only distributions used by the runtime About library list.
 for distribution in ('PySide6', 'torch', 'scipy', 'pyqtgraph', 'sounddevice'):
     datas += copy_metadata(distribution)
-hidden=[p.stem for p in source.glob('*.py')]
+hidden=['tngpkt.'+p.stem for p in (source/'tngpkt').glob('*.py') if p.stem != '__main__']
 a=Analysis([str(root/'launcher.py')],pathex=[str(source)],binaries=[],datas=datas,hiddenimports=hidden,hookspath=[str(root/'hooks')],runtime_hooks=[],excludes=['tkinter','PyQt5','PyQt6','PySide2','onnx','onnxruntime','torchvision','torchaudio','pytest','IPython','notebook','tensorboard','PySide6.QtVirtualKeyboard','PySide6.QtPdf','PySide6.QtPdfWidgets'],noarchive=False)
 # Unused automatic compiler/software-renderer collection is not distributed.
 omit = {'opengl32sw.dll', 'protoc.exe'}

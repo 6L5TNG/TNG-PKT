@@ -50,7 +50,7 @@ Windows에서 **Python 3.13**으로 이 소스를 실행하려면 소스 루트�
 ```powershell
 python -m venv .venv
 & .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-& .\.venv\Scripts\python.exe neuromod_app.py
+& .\.venv\Scripts\python.exe -m tngpkt
 ```
 
 최초 실행 시 언어를 선택하고 호출부호를 입력한 뒤, 무전기에 연결된 오디오 입력·출력을 선택하십시오. 필요한 경우 무전기 연결도 설정합니다. 초기 설정에는 CPU·오디오 진단 기능도 있습니다.

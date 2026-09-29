@@ -50,7 +50,7 @@ To run this source on Windows with **Python 3.13**, open PowerShell in the sourc
 ```powershell
 python -m venv .venv
 & .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-& .\.venv\Scripts\python.exe neuromod_app.py
+& .\.venv\Scripts\python.exe -m tngpkt
 ```
 
 On first launch, choose a language, enter your callsign, select the audio input/output connected to your radio and configure a radio connection if needed. The setup also provides CPU/audio diagnostics.

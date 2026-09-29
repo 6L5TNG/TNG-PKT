@@ -16,7 +16,7 @@ Run these commands in PowerShell from the source root:
 ```powershell
 python -m venv .venv
 & .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-& .\.venv\Scripts\python.exe neuromod_app.py
+& .\.venv\Scripts\python.exe -m tngpkt
 ```
 
 Keep `models/stage3.pt`, `models/stage3_strong.pt`, `assets/` and `style.qss`
@@ -37,7 +37,7 @@ installer in `output/TNG-PKT-Setup-0.11.2.exe`. Use `-Output` to select another
 installer output directory.
 
 The script builds this source directly, installs dependencies over the network,
-checks for CPU PyTorch and reads the version from `registry.py`.
+checks for CPU PyTorch and reads the version from `tngpkt/registry.py`.
 The PyInstaller spec includes both models, assets and `style.qss`.
 The build script does not increment version or build numbers.
 

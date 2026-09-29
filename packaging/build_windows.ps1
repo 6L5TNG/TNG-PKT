@@ -25,7 +25,7 @@ Push-Location $taskWork
 try {
     & $taskEnvPython -X utf8 -m PyInstaller --noconfirm --distpath dist --workpath build "$PSScriptRoot\TNG-PKT.spec"
     if ($LASTEXITCODE) { throw 'PyInstaller failed' }
-    $taskVersion = & $taskEnvPython -X utf8 -c 'import ast,os,pathlib; t=ast.parse((pathlib.Path(os.environ["TNG_PKT_SOURCE"])/"registry.py").read_text(encoding="utf-8")); print(next(n.value.value for n in t.body if isinstance(n,ast.Assign) and any(isinstance(x,ast.Name) and x.id=="APP_VERSION" for x in n.targets)))'
+    $taskVersion = & $taskEnvPython -X utf8 -c 'import ast,os,pathlib; t=ast.parse((pathlib.Path(os.environ["TNG_PKT_SOURCE"])/"tngpkt"/"registry.py").read_text(encoding="utf-8")); print(next(n.value.value for n in t.body if isinstance(n,ast.Assign) and any(isinstance(x,ast.Name) and x.id=="APP_VERSION" for x in n.targets)))'
     if ($LASTEXITCODE) { throw 'Version read failed' }
     [IO.Directory]::CreateDirectory($taskOutput) | Out-Null
     & $taskIscc "/DAppVersion=$taskVersion" "/FTNG-PKT-Setup-$taskVersion" "/O$taskOutput" "/DDistDir=$taskWork\dist" "$PSScriptRoot\installer.iss"
